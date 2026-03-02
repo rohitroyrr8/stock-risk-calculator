@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  assessment-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: assessment-script-prod
+    image: assessment-script:${DOCKER_TAG:-latest}
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./historical-prices:/app/historical-prices:ro
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
+      - APP_ENV=production
+    restart: unless-stopped
+    networks:
+      - assessment-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import scipy; import pandas"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+networks:
+  assessment-network:
+    driver: bridge

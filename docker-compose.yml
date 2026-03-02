@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  assessment-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: assessment-script
+    image: assessment-script:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./historical-prices:/app/historical-prices:ro
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: no
+    networks:
+      - assessment-network
+
+networks:
+  assessment-network:
+    driver: bridge
